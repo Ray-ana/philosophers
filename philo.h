@@ -6,7 +6,7 @@
 /*   By: rzimaeva <rzimaeva@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 16:11:02 by rzimaeva          #+#    #+#             */
-/*   Updated: 2026/06/18 14:00:52 by rzimaeva         ###   ########.fr       */
+/*   Updated: 2026/06/18 16:05:20 by rzimaeva         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ typedef struct s_struct_globale
     pthread_mutex_t write_lock;
     pthread_mutex_t dead_lock;
     pthread_mutex_t *fork_lock; //empeche les philos de prendre la meme fourchette
-    t_philo *philos; //on va stocker la memoire ici
+    t_philo *philo; //on va stocker la memoire ici
 }   t_struct_globale;
 
 // Utils
@@ -60,5 +60,13 @@ int     nb_args(int ac, char **av);
 int     init_info(t_struct_globale *info, int ac, char **av);
 int     alloc_info(t_struct_globale *info);
 
+// Mutex
+int init_mutex(t_struct_globale *info);
+void init_forks(t_struct_globale *info);
+void    launch_threads(t_struct_globale *info);
+void *routine_philos(void *arg);
+void    destroy_mutex(t_struct_globale *info);
+
+
 #endif
-//mutex c'est un lock, il verouille un thread pour qu'un autre fasse sa tache
+//mutex c'est un lock, il verouille un thread pour qu'un autre fasse sa propre tache
