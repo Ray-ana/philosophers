@@ -6,11 +6,43 @@
 /*   By: rzimaeva <rzimaeva@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 18:23:06 by rzimaeva          #+#    #+#             */
-/*   Updated: 2026/06/18 16:05:00 by rzimaeva         ###   ########.fr       */
+/*   Updated: 2026/06/26 21:43:59 by rzimaeva         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
+
+//initialiser les mutex
+int init_mutex(t_struct_globale *info)
+{
+    int i;
+
+    i = 0;
+    while (i < info->nb_philos)
+    {
+        pthread_mutex_init(&info->fork_lock[i], NULL);
+        i++;
+    }
+    pthread_mutex_init(&info->write_lock, NULL);
+    pthread_mutex_init(&info->dead_lock, NULL);
+    return (1); //pour pouvoir dire dans le main si tout est bon avec 1 sinon 0
+}
+
+void    destroy_mutex(t_struct_globale *info)
+{
+    int i;
+
+    i = 0;
+    while (i < info->nb_philos)
+    {
+        pthread_mutex_destroy(&info->fork_lock[i]);
+        pthread_mutex_destroy(&info->philo[i].meal_lock);
+        i++;
+    }
+    free (info->philo);
+    free (info->fork_lock);
+    free (info);
+}
 
 int	init_info(t_struct_globale *info, int ac, char **av)
 {
@@ -56,6 +88,8 @@ void init_forks(t_struct_globale *info)
     while (i < info->nb_philos)
     {
         info->philo[i].id = i + 1;
+        info->philo[i].s_globale = info;
+        pthread_mutex_init(&info->philo[i].meal_lock, NULL);
         info->philo[i].left_fork = &info->fork_lock[i];
         if (i == info->nb_philos - 1) //le dernier philosophe, la fourchette a sa droite est celle du 0
             info->philo[i].right_fork = &info->fork_lock[0]; //si c'est bien le dernier sa fourchette sera bien 0 (celle du premier) et non 3
@@ -64,31 +98,5 @@ void init_forks(t_struct_globale *info)
         i++;
     }
 }
+//on doit relier philo a la structure globale pour que ca fasse comme une boucle
 //fourchette gauche a le meme num que le philo alors que celle de droite a celui du voisin
-
-//le philo lock pour pouvoir mager et unlock pour penser et dormir et laisser les autres manger
-void *routine_philos(void *arg)
-{
-    t_philo *philo;
-
-    philo = (t_philo *)arg; //le void *arg a ete converti en pointeur de philo avec la struct t_philo rattachee
-    while (1)
-    {
-        if (philo->id % 2 == 0) //etape pour manger si pair philo commence par la fourchette gauche puis droite et vice versa
-        {
-            pthread_mutex_lock(philo->left_fork);
-            pthread_mutex_lock(philo->right_fork);
-        }
-        else
-        {
-            pthread_mutex_lock(philo->right_fork);
-            pthread_mutex_lock(philo->left_fork);
-        }
-        usleep (500);
-        pthread_mutex_unlock(philo->left_fork);
-        pthread_mutex_unlock(philo->right_fork);
-        usleep (500);
-    }
-    return (NULL);
-}
-//pas d'esperluettes car left fork et right fork sont deja des pointeurs alors ont toujours l'update de l'adresse source 

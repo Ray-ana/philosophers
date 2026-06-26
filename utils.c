@@ -6,7 +6,7 @@
 /*   By: rzimaeva <rzimaeva@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 16:11:05 by rzimaeva          #+#    #+#             */
-/*   Updated: 2026/06/18 15:51:50 by rzimaeva         ###   ########.fr       */
+/*   Updated: 2026/06/26 21:16:34 by rzimaeva         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ int	nb_args(int ac, char **av)
 	return (1);
 }
 
-
 int ft_atoi(char *str)
 {
 	int i;
@@ -64,7 +63,7 @@ int ft_atoi(char *str)
 	return (res * sign);
 }
 
-void error_exit(const char *error)
+void exit_error(const char *error)
 {
 	printf("%s\n", error);
 	exit(EXIT_FAILURE);

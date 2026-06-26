@@ -6,7 +6,7 @@
 /*   By: rzimaeva <rzimaeva@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 16:11:02 by rzimaeva          #+#    #+#             */
-/*   Updated: 2026/06/18 16:05:20 by rzimaeva         ###   ########.fr       */
+/*   Updated: 2026/06/26 21:38:54 by rzimaeva         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,10 +28,10 @@ typedef struct s_philo
     int id; //si c'est philo 1, 2, 3 ou 4
     int nb_meals; //combien de fois il a mange
     long long last_meal_time; //long long parce qu'on doit manipuler des microsecondes avec le gettimeofday
-    bool full; //max de repas qu'il peut prendre
     pthread_t thread;
     pthread_mutex_t *left_fork;
     pthread_mutex_t *right_fork;
+    pthread_mutex_t meal_lock; //pour que le moniteur puisse lire nb_meals et last_meal_time sans data race
     t_struct_globale *s_globale;
 }   t_philo;
 
@@ -44,6 +44,7 @@ typedef struct s_struct_globale
     int max_meals;
     long long start_time; //quand on lance la simulation
     bool end; //que en 0 ou en 1 donc pas besoin de long long
+    pthread_t   monitor;
     pthread_mutex_t write_lock;
     pthread_mutex_t dead_lock;
     pthread_mutex_t *fork_lock; //empeche les philos de prendre la meme fourchette
@@ -51,12 +52,13 @@ typedef struct s_struct_globale
 }   t_struct_globale;
 
 // Utils
+int     nb_args(int ac, char **av);
 int     ft_atoi(char *str);
-void    error_exit(const char *error);
+void    exit_error(const char *error);
 void	free_tab(char **tab);
+void    ft_usleep(long long time_in_ms);
 
 // Parsing
-int     nb_args(int ac, char **av);
 int     init_info(t_struct_globale *info, int ac, char **av);
 int     alloc_info(t_struct_globale *info);
 
