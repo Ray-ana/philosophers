@@ -6,62 +6,63 @@
 /*   By: rzimaeva <rzimaeva@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 16:11:11 by rzimaeva          #+#    #+#             */
-/*   Updated: 2026/06/26 21:46:27 by rzimaeva         ###   ########.fr       */
+/*   Updated: 2026/06/30 18:07:32 by rzimaeva         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-static int    join_threads(t_struct_globale *info)
+static int	join_threads(t_struct_globale *data)
 {
-    int i;
-    
-    i = 0;
-    while (i < info->nb_philos)
-    {
-        if (pthread_join(info->philo[i].thread, NULL) != 0)
-            return (0);
-        i++;
-    }
-    if (pthread_join(info->monitor, NULL) != 0)
-            return (0);
-    return (1);
-}
-//permet de lancer les threads apres avoir boucler sur chaque philo
-int    launch_threads(t_struct_globale *info)
-{
-    int i;
+	int	i;
 
-    i = 0;
-    info->start_time = get_current_time();
-    while (i < info->nb_philos)
-    {
-        info->philo[i].last_meal_time = info->start_time; //impose de commencer ici
-        if (pthread_create(&info->philo[i].thread, NULL, \
-            &routine_philos, &info->philo[i]) != 0) //on met en if au cas ou elle echoue comme ca on peut l'arreter direct
-            return (0);
-        i++;
-    }
-    if (pthread_create(&info->monitor, NULL, &monitor_routine, info) != 0)
-        return (0);
-    return (join_threads(info));
+	i = 0;
+	while (i < data->nb_philos)
+	{
+		if (pthread_join(data->philo[i].thread, NULL) != 0)
+			return (0);
+		i++;
+	}
+	if (pthread_join(data->monitor, NULL) != 0)
+		return (0);
+	return (1);
 }
 
-int main(int ac, char **av)
+// permet de lancer les threads apres avoir boucle sur chaque philo
+int	launch_threads(t_struct_globale *data)
 {
-    t_struct_globale info;
+	int	i;
 
-    if (ac != 5 && ac != 6)
-        error_exit("Wrong input:\nCorrect input is: ./philo 1 800 200 200 [1]");
-    if (nb_args(ac, av) == 0)
-        return (printf("Error: Arguments must be integers\n"), 1);
-    if (init_info(&info, ac, av) == 0)
-        return (printf("Error: Arguments values must be greater than 0\n"), 1);
-    if (alloc_info(&info) == 0 || init_mutex(&info) == 0)
-        return (1);
-    init_forks(&info);
-    if (launch_threads(&info) == 0)
-        return (destroy_mutex(&info), 1);
-    destroy_mutex(&info);
-    return (0);
+	i = 0;
+	data->start_time = get_current_time();
+	while (i < data->nb_philos)
+	{
+		data->philo[i].last_meal_time = data->start_time;
+		if (pthread_create(&data->philo[i].thread, NULL, &routine_philos,
+				&data->philo[i]) != 0)
+			return (0);
+		i++;
+	}
+	if (pthread_create(&data->monitor, NULL, &monitor_routine, data) != 0)
+		return (0);
+	return (join_threads(data));
+}
+
+int	main(int ac, char **av)
+{
+	t_struct_globale	data;
+
+	if (ac != 5 && ac != 6)
+		return (printf("Correct input is: ./philo 2 800 200 200 [2]\n"), 1);
+	if (nb_args(ac, av) == 0)
+		return (printf("Error: Arguments must be integers\n"), 1);
+	if (init_data(&data, ac, av) == 0)
+		return (printf("Error: Arguments values must be greater than 0\n"), 1);
+	if (alloc_data(&data) == 0 || init_mutex(&data) == 0)
+		return (1);
+	init_forks(&data);
+	if (launch_threads(&data) == 0)
+		return (destroy_mutex(&data), 1);
+	destroy_mutex(&data);
+	return (0);
 }
